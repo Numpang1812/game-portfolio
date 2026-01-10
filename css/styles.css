@@ -535,30 +535,3 @@ canvas {
 #btn-container button:active {
     background: rgba(255, 255, 255, 0.5);
 }
-
-/* Show on Mobile Devices */
-@media (max-width: 1366px),
-(pointer: coarse) {
-    #mobile-ui {
-        display: block !important;
-        /* Force show on mobile */
-    }
-
-    /* Hide crosshair on mobile? Or keep for aiming? Keep it. */
-
-    /* Adjust Start Screen for mobile */
-    #start-screen h1 {
-        font-size: 2.5rem;
-    }
-
-    #start-screen p {
-        font-size: 1rem;
-    }
-
-    /* Pickup Hint Position Adjust */
-    #pickup-hint {
-        top: 70%;
-        /* Move up a bit to not be covered by joystick? Or down? */
-        font-size: 1.2rem;
-    }
-}
