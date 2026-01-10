@@ -1,17 +1,5 @@
 # Portfolio Project Documentation
 
-## Hosting on GitHub
-
-**Yes, this project is fully hostable on GitHub Pages.**
-
-Because this project uses only client-side technologies (HTML, CSS, JavaScript) and no backend server (like Node.js, PHP, or Python), you can host it directly on GitHub Pages for free.
-
-### How to Host:
-1.  Push all these files to a GitHub repository.
-2.  Go to repository **Settings** -> **Pages**.
-3.  Select the `main` branch and `/ (root)` folder.
-4.  Save. GitHub will provide a URL where your game is live.
-
 ---
 
 ## Technology Stack
