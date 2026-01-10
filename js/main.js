@@ -21,12 +21,13 @@ let selectedCharacter = "knight";
 let touchControls; // Mobile controls
 let backgroundMusic; // Background audio
 let menuMusic; // Menu-only audio
+const clouds = []; // Array to store cloud meshes
 
 
-// Document collection tracking
+// Document Colors and Keys
 const documentTypes = [
     { key: "intro", color: 0x3498db },
-    { key: "objective", color: 0x2ecc71 },
+    { key: "objective", color: 0xffa500 }, 
     { key: "skills", color: 0xe74c3c },
     { key: "experience", color: 0x9b59b6 },
     { key: "hobbies", color: 0xf1c40f }
@@ -91,19 +92,8 @@ document.getElementById('start-button').addEventListener('click', function () {
     let playerName = "Traveler"; // Default temporary name
     document.getElementById('start-screen').style.display = 'none';
 
-    // Stop menu music
-    if (menuMusic) {
-        menuMusic.pause();
-        menuMusic = null;
-    }
-
-    // Initialize and play background music
-    if (!backgroundMusic) {
-        backgroundMusic = new Audio('models/10 Minutes in a Peaceful Medieval Fantasy Village  4K Ambience  Magical Folk Music.mp3');
-        backgroundMusic.loop = true;
-        backgroundMusic.volume = 0.5; // Start at 50% volume
-        backgroundMusic.play().catch(e => console.warn("Music playback failed:", e));
-    }
+    // Stop menu music is moved to cutscene.onComplete
+    // Initialize and play background music is moved to cutscene.onComplete
 
     // Update character image for cutscene
     const charImg = document.getElementById('character-image');
@@ -114,47 +104,33 @@ document.getElementById('start-button').addEventListener('click', function () {
         // Callback when name is determined
         playerName = name;
     }, () => {
-        // On Complete
-        document.getElementById('crosshair').style.display = 'block';
+        // On Complete - Transitions the music and starts the game
 
-        // Only lock controls if user interacts again, or hope browser allows it (often requires direct input)
-        // But since cutscene end is async, we might lose "user gesture" context for PointerLock.
-        // A simple workaround: Ask user to click to start GAME after cutscene.
-        // OR: Just try to init.
+        // Stop menu music
+        if (menuMusic) {
+            menuMusic.pause();
+            menuMusic = null;
+        }
+
+        // Initialize and play background music
+        if (!backgroundMusic) {
+            backgroundMusic = new Audio('models/10 Minutes in a Peaceful Medieval Fantasy Village  4K Ambience  Magical Folk Music.mp3');
+            backgroundMusic.loop = true;
+            backgroundMusic.volume = 0.5; // Start at 50% volume
+            backgroundMusic.play().catch(e => console.warn("Music playback failed:", e));
+        }
+
+        document.getElementById('crosshair').style.display = 'block';
 
         init();
         animate();
 
-        // Re-request lock if needed or add a "Click to Enter" overlay if lock fails.
-        // For now, let's try direct lock, but it might fail without recent user gesture.
-        // Best UX: Cutscene ends -> "Begin Journey" button -> Click -> Lock & Play.
-        // Adding a small intermediate step for lock safety:
-
-        const blocker = document.createElement('div');
-        blocker.style.position = 'absolute';
-        blocker.style.top = '0';
-        blocker.style.left = '0';
-        blocker.style.width = '100%';
-        blocker.style.height = '100%';
-        blocker.style.zIndex = '999';
-        blocker.style.display = 'flex';
-        blocker.style.justifyContent = 'center';
-        blocker.style.alignItems = 'center';
-        blocker.style.background = 'rgba(0,0,0,0.5)';
-        blocker.style.color = 'white';
-        blocker.style.fontSize = '2rem';
-        blocker.style.cursor = 'pointer';
-        blocker.textContent = "CLICK TO BEGIN JOURNEY";
-        document.body.appendChild(blocker);
-
-        blocker.addEventListener('click', () => {
-            blocker.remove();
-            try {
-                controls.lock();
-            } catch (e) {
-                console.warn("Pointer lock failed (expected on mobile)");
-            }
-        });
+        // Directly request lock (preserved user gesture context from click)
+        try {
+            controls.lock();
+        } catch (e) {
+            console.warn("Pointer lock failed (expected on mobile)");
+        }
     });
 
     cutscene.start();
@@ -228,26 +204,9 @@ function init() {
 
     // Handle Pointer Lock Unlock (Esc key or system unlock)
     controls.addEventListener('unlock', () => {
-        // Logic to decide if we should show pause menu
-        // If it's a "system" unlock (like opening a document or cutscene), we probably don't want the pause menu
-        // But the user asked for Esc to work even in cutscenes.
 
         // Check if we are in a cutscene by checking the overlay visibility
         const isCutsceneActive = document.getElementById('cutscene-overlay').style.display !== 'none';
-
-        // If we just gathered a doc, main.js unlocks controls.
-        // We can check if `cutscene` object exists and is running?
-
-        // Simple heuristic: If the user pressed Esc, they probably want to pause.
-        // There is no easy way to distinguish "Esc" from "Programmatic Unlock" in Three.js PointerLockControls 
-        // without tracking state before unlock.
-
-        // Let's assume ANY unlock that isn't immediately followed by another UI state transition (like doc collection) 
-        // IS a pause request. 
-        // However, `checkDocumentCollection` calls `controls.unlock()`.
-
-        // We can add a small timeout or flag.
-        // Or better: Let `checkDocumentCollection` set a flag `isSystemUnlock = true` before unlocking.
 
         if (window.isSystemUnlock) {
             window.isSystemUnlock = false; // Reset for next time
@@ -301,6 +260,9 @@ function init() {
     // Add documents
     createDocuments();
 
+    // Add clouds
+    createClouds();
+
     // ✅ HANDLE WINDOW RESIZE
     window.addEventListener('resize', function () {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -321,21 +283,77 @@ function init() {
     });
 }
 
+function createClouds() {
+    const cloudCount = 30;
+    const range = 400;
+
+    for (let i = 0; i < cloudCount; i++) {
+        const clusterSize = 4 + Math.floor(Math.random() * 4);
+        const clusterGroup = new THREE.Group();
+
+        for (let j = 0; j < clusterSize; j++) {
+            const w = 5 + Math.random() * 20;
+            const h = 3 + Math.random() * 10;
+            const d = 5 + Math.random() * 15;
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                flatShading: true
+            });
+
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(
+                (Math.random() - 0.5) * 15,
+                (Math.random() - 0.5) * 5,
+                (Math.random() - 0.5) * 15
+            );
+            mesh.castShadow = true;
+            clusterGroup.add(mesh);
+        }
+
+        const x = (Math.random() - 0.5) * range;
+        const y = 80 + Math.random() * 40;
+        const z = (Math.random() - 0.5) * range;
+
+        clusterGroup.position.set(x, y, z);
+        clusterGroup.userData = { speed: 0.02 + Math.random() * 0.05 };
+        scene.add(clusterGroup);
+        clouds.push(clusterGroup);
+    }
+}
+
 // Create document objects
 function createDocuments() {
     // Determine random positions on land
-    const range = 100;
+    const range = 170;// Increased range for better scattering
+    const minDistance = 10; // Minimum distance between documents
+    const placedPositions = [];
     let created = 0;
 
-    while (created < 5) {
+    let attempts = 0;
+    while (created < 5 && attempts < 1000) {
+        attempts++;
         const x = (Math.random() - 0.5) * range;
         const z = (Math.random() - 0.5) * range;
         const y = terrain.getHeightAt(x, z);
 
-        // Only place if above water
-        if (y > -1) {
-            // Make document bigger: (1.5, 0.15, 2.1) - roughly 3x
-            const documentGeometry = new THREE.BoxGeometry(1, 0.15, 1.7);
+        // Only place if on land (above water level -2 with buffer)
+        if (y > 0) {
+            // Check minimum distance from other documents
+            let tooClose = false;
+            for (const pos of placedPositions) {
+                const dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(z - pos.z, 2));
+                if (dist < minDistance) {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (tooClose) continue;
+
+            const documentGeometry = new THREE.BoxGeometry(0.15, 1.3, 0.9);
             const documentMaterial = new THREE.MeshPhongMaterial({
                 color: documentTypes[created].color,
                 emissive: 0x111111,
@@ -343,46 +361,33 @@ function createDocuments() {
             });
 
             const docMesh = new THREE.Mesh(documentGeometry, documentMaterial);
-            docMesh.position.set(x, y + 1.5, z); // Lift it up a bit more
+            docMesh.position.set(x, y + 1.5, z);
             docMesh.rotation.y = Math.random() * Math.PI;
             docMesh.userData = {
                 index: created,
                 collected: false,
-                key: documentTypes[created].key // Use Key
+                key: documentTypes[created].key
             };
             docMesh.castShadow = true;
 
-            // Make marker bigger and more visible arrow-like
-            // Cone instead of just cylinder tapering?
-            // CylinderGeometry(radiusTop, radiusBottom, height, radialSegments)
-            // Old: (0.1, 0, 1, 8) -> Tiny cone.
-            // New: (0.5, 0, 2, 8) -> Big cone.
-            const markerGeo = new THREE.CylinderGeometry(0.6, 0, 3, 8);
+            const markerGeo = new THREE.CylinderGeometry(1, 0, 4, 16);
             const markerMat = new THREE.MeshBasicMaterial({
                 color: documentTypes[created].color,
                 transparent: true,
                 opacity: 0.8
             });
             const marker = new THREE.Mesh(markerGeo, markerMat);
-            marker.position.y = 2.5; // Sit on top of the document
-
-            // Add an outline or second inverted cone for "Arrow" look?
-            // Actually, an inverted cone pointing down at the doc is usually better for "markers".
-            // The current one `CylinderGeometry(0.1, 0, ...)` has Top=0.1, Bottom=0. That's an inverted cone (wider at top).
-            // Wait, CylinderGeometry(radiusTop, radiusBottom...). 
-            // 0.1 top, 0 bottom = Inverted cone (V shape).
-            // Users usually expect a V shape pointing down. 
-            // Let's make it bigger: Top=0.8, Bottom=0. Height=2.5.
+            marker.position.y = 2.5;
 
             docMesh.add(marker);
 
-            // Add a point light to make it glow?
             const light = new THREE.PointLight(documentTypes[created].color, 1, 10);
             light.position.y = 2;
             docMesh.add(light);
 
             scene.add(docMesh);
             documents.push(docMesh);
+            placedPositions.push({ x, z });
             created++;
         }
     }
@@ -446,40 +451,16 @@ function checkDocumentCollection() {
 
             // Define resume callback
             cutscene.onComplete = () => {
-                // Prevent duplicate blockers
-                if (document.getElementById('resume-blocker')) return;
+                try {
+                    controls.lock();
+                } catch (e) {
+                    // Ignore on mobile
+                }
 
-                const blocker = document.createElement('div');
-                blocker.id = 'resume-blocker';
-                blocker.style.position = 'absolute';
-                blocker.style.top = '0';
-                blocker.style.left = '0';
-                blocker.style.width = '100%';
-                blocker.style.height = '100%';
-                blocker.style.zIndex = '999';
-                blocker.style.display = 'flex';
-                blocker.style.justifyContent = 'center';
-                blocker.style.alignItems = 'center';
-                blocker.style.background = 'rgba(0,0,0,0.5)';
-                blocker.style.color = 'white';
-                blocker.style.fontSize = '2rem';
-                blocker.style.cursor = 'pointer';
-                blocker.textContent = "CLICK TO RESUME";
-                document.body.appendChild(blocker);
-
-                blocker.addEventListener('click', () => {
-                    blocker.remove();
-                    try {
-                        controls.lock();
-                    } catch (e) {
-                        // Ignore on mobile
-                    }
-
-                    // Win condition check after resume
-                    if (collectedCount === documents.length) {
-                        setTimeout(triggerEndingSequence, 1000);
-                    }
-                });
+                // Win condition check after resume
+                if (collectedCount === documents.length) {
+                    setTimeout(triggerEndingSequence, 1000);
+                }
             };
 
             cutscene.start(dialogue);
@@ -570,7 +551,6 @@ document.getElementById('view-cv-button').addEventListener('click', () => {
 });
 
 // Check if hint should be shown
-// Check if hint should be shown
 function updatePickupHint() {
     if (!controls || !controls.getObject()) return;
 
@@ -603,19 +583,6 @@ function animate() {
     const isLocked = controls.isLocked;
     const isTouch = touchControls && touchControls.isActive();
     const isGameActive = isLocked || isTouch || (touchControls && touchControls.joystickActive); // Allow joystick even if not effectively looking
-
-    // We must allow physics loop if game is active AND not in cutscene/pause
-    // Actually, controls.isLocked handles the "Playing" state.
-    // For mobile, controls won't be locked (no pointer lock).
-    // So we need a comprehensive "isPlaying" check.
-    // But `controls.isLocked` is used as the flag for "Menu Closed".
-    // On mobile, we might not use PointerLock API at all.
-    // Let's assume on Mobile, we are "Locked" (playing) if the Start Screen is gone.
-
-    // Better approach:
-    // If Desktop: controls.isLocked drives the loop.
-    // If Mobile: Just being "started" drives the loop. 
-    // But we reuse `controls.getObject()` logic which is fine.
 
     // Let's check if start screen is hidden
     const isStarted = document.getElementById('start-screen').style.display === 'none';
@@ -703,6 +670,12 @@ function animate() {
         if (doc.visible) {
             doc.rotation.y += 0.01;
         }
+    });
+
+    // Update clouds
+    clouds.forEach(cloud => {
+        cloud.position.x += cloud.userData.speed;
+        if (cloud.position.x > 250) cloud.position.x = -250;
     });
 
     renderer.render(scene, camera);

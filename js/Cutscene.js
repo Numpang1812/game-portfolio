@@ -182,10 +182,13 @@ class Cutscene {
 
     end() {
         clearTimeout(this.autoAdvanceTimer);
+
+        // Trigger onComplete IMMEDIATELY to preserve user gesture context (for PointerLock)
+        if (this.onComplete) this.onComplete();
+
         this.overlay.style.opacity = '0';
         setTimeout(() => {
             this.overlay.style.display = 'none';
-            if (this.onComplete) this.onComplete();
         }, 1000); // Fade out duration
     }
 }
