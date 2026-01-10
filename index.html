@@ -15,18 +15,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 
-<body>
-    <div id="start-screen">
-        <h1>ようこそ！</h1>
-        <p>これはパンのポートフォリオです。WASDで移動し、マウスで見る方向を変更してください。スペースキーでジャンプし、Eキーで文書を拾うことができます。</p>
-        <p>このゲームでは、五つの書類がありますから、すべて拾ってください。それぞれの書類には、それぞれの情報があります。すべて拾ったら、ゲームを終了してください。</p>
-        <p>楽しんで、よろしくお願いいたします！</p>
+<div id="entry-screen">
+    <div id="entry-content">
+        <h1 id="entry-text">Click to Enter</h1>
+    </div>
+</div>
+
+<div id="start-screen" style="display: none;">
+    <h1>ようこそ！</h1>
+    <p>これはパンのポートフォリオです。WASDで移動し、マウスで見る方向を変更してください。スペースキーでジャンプし、Eキーで文書を拾うことができます。</p>
+    <p>このゲームでは、五つの書類がありますから、すべて拾ってください。それぞれの書類には、それぞれの情報があります。すべて拾ったら、ゲームが終わって、CVを表示します。</p>
+    <p>楽しんで、よろしくお願いいたします！</p>
 
 
 
 
-        <button id="start-button">スタート</button>
-        <button id="lang-toggle" style="position: absolute; 
+    <button id="start-button">スタート</button>
+    <button id="lang-toggle" style="position: absolute; 
             top: 20px; 
             right: 50px; 
             background: transparent; 
@@ -38,68 +43,69 @@
             background-color: rgba(0, 0, 0, 0.5);
             padding: 10px 15px;
             border-radius: 8px;">Language:
-            JP</button>
+        JP</button>
+</div>
+
+<div id="ui-container">
+    Documents Collected: <span id="document-count">0</span>/5
+    <div id="collected-docs"></div>
+</div>
+<div id="pickup-hint" style="display: none;"></div>
+
+<div id="mobile-ui"> <!-- Hidden by default via CSS, shown via media query -->
+    <div id="joystick-zone">
+        <div id="joystick-knob"></div>
+    </div>
+    <div id="btn-container">
+        <button id="btn-jump">JUMP</button>
+        <button id="btn-pickup">PICK</button>
+    </div>
+</div>
+
+<div id="crosshair"></div>
+
+<div class="instructions">
+    <p><strong>コントロール:</strong><br>
+        WASD - 動く<br>
+        マウス - 見る<br>
+        SPACE - ジャンプ<br>
+        E - 書類を取る</p>
+</div>
+<div id="cutscene-overlay">
+    <div id="character-container">
+        <img id="character-image" src="models/knight.png" alt="Character">
     </div>
 
-    <div id="ui-container">
-        Documents Collected: <span id="document-count">0</span>/5
-        <div id="collected-docs"></div>
-    </div>
-    <div id="pickup-hint" style="display: none;"></div>
-
-    <div id="mobile-ui"> <!-- Hidden by default via CSS, shown via media query -->
-        <div id="joystick-zone">
-            <div id="joystick-knob"></div>
-        </div>
-        <div id="btn-container">
-            <button id="btn-jump">JUMP</button>
-            <button id="btn-pickup">PICK</button>
-        </div>
+    <!-- Name Input for Cutscene -->
+    <div id="cutscene-input-container" class="name-entry-box" style="display: none;">
+        <p>名前を入力してください。</p>
+        <input type="text" id="cutscene-name-input" placeholder="" maxlength="15">
     </div>
 
-    <div id="crosshair"></div>
-
-    <div class="instructions">
-        <p><strong>コントロール:</strong><br>
-            WASD - 動く<br>
-            マウス - 見る<br>
-            SPACE - ジャンプ<br>
-            E - 書類を取る</p>
+    <div id="dialogue-box">
+        <div id="character-name"></div>
+        <div id="dialogue-text"></div>
     </div>
-    <div id="cutscene-overlay">
-        <div id="character-container">
-            <img id="character-image" src="models/knight.png" alt="Character">
-        </div>
-
-        <!-- Name Input for Cutscene -->
-        <div id="cutscene-input-container" class="name-entry-box" style="display: none;">
-            <p>名前を入力してください。</p>
-            <input type="text" id="cutscene-name-input" placeholder="" maxlength="15">
-        </div>
-
-        <div id="dialogue-box">
-            <div id="character-name"></div>
-            <div id="dialogue-text"></div>
+</div>
+<div id="pause-menu" style="display: none;">
+    <div id="pause-container">
+        <h1>Paused</h1>
+        <div class="pause-buttons">
+            <button id="resume-button">Resume</button>
+            <button id="home-button">Back to Home</button>
         </div>
     </div>
-    <div id="pause-menu" style="display: none;">
-        <div id="pause-container">
-            <h1>Paused</h1>
-            <div class="pause-buttons">
-                <button id="resume-button">Resume</button>
-                <button id="home-button">Back to Home</button>
-            </div>
+</div>
+<div id="ending-menu" style="display: none;">
+    <div id="ending-container">
+        <h1>Thank You!</h1>
+        <div class="pause-buttons">
+            <button id="view-cv-button">View CV</button>
+            <button id="roam-button">Roam Around</button>
+            <button id="ending-home-button">Main Menu</button>
         </div>
     </div>
-    <div id="ending-menu" style="display: none;">
-        <div id="ending-container">
-            <h1>Thank You!</h1>
-            <div class="pause-buttons">
-                <button id="roam-button">Roam Around</button>
-                <button id="ending-home-button">Main Menu</button>
-            </div>
-        </div>
-    </div>
+</div>
 </body>
 <script src="js/Localization.js"></script>
 <script src="js/TouchControls.js"></script>

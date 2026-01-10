@@ -19,6 +19,8 @@ let terrain;
 let cutscene;
 let selectedCharacter = "knight";
 let touchControls; // Mobile controls
+let backgroundMusic; // Background audio
+let menuMusic; // Menu-only audio
 
 
 // Document collection tracking
@@ -41,6 +43,40 @@ if (langBtn) {
     });
 }
 
+// Entry Screen Logic (Handles Autoplay)
+const entryScreen = document.getElementById('entry-screen');
+const startScreen = document.getElementById('start-screen');
+
+const handleEntry = () => {
+    // Start menu music immediately on legal interaction
+    if (!menuMusic) {
+        menuMusic = new Audio('models/kousui.mp3');
+        menuMusic.loop = true;
+        menuMusic.volume = 0.4;
+        menuMusic.play().catch(e => console.warn("Menu music blocked:", e));
+    }
+
+    // Hide entry screen and show start screen
+    entryScreen.style.opacity = '0';
+    setTimeout(() => {
+        entryScreen.style.display = 'none';
+        startScreen.style.display = 'flex';
+        startScreen.style.opacity = '0';
+        // Fade in start screen
+        setTimeout(() => startScreen.style.opacity = '1', 50);
+    }, 1000);
+
+    // Remove listeners
+    document.removeEventListener('click', handleEntry);
+    document.removeEventListener('keydown', handleEntry);
+};
+
+// Only add listeners if entry screen is present
+if (entryScreen) {
+    document.addEventListener('click', handleEntry);
+    document.addEventListener('keydown', handleEntry);
+}
+
 // Character Selection Logic
 document.querySelectorAll('.char-option').forEach(option => {
     option.addEventListener('click', () => {
@@ -54,6 +90,20 @@ document.querySelectorAll('.char-option').forEach(option => {
 document.getElementById('start-button').addEventListener('click', function () {
     let playerName = "Traveler"; // Default temporary name
     document.getElementById('start-screen').style.display = 'none';
+
+    // Stop menu music
+    if (menuMusic) {
+        menuMusic.pause();
+        menuMusic = null;
+    }
+
+    // Initialize and play background music
+    if (!backgroundMusic) {
+        backgroundMusic = new Audio('models/10 Minutes in a Peaceful Medieval Fantasy Village  4K Ambience  Magical Folk Music.mp3');
+        backgroundMusic.loop = true;
+        backgroundMusic.volume = 0.5; // Start at 50% volume
+        backgroundMusic.play().catch(e => console.warn("Music playback failed:", e));
+    }
 
     // Update character image for cutscene
     const charImg = document.getElementById('character-image');
@@ -490,11 +540,15 @@ function triggerEndingSequence() {
     const endingDialogue = LANG[currentLanguage].dialogues.ending;
 
     cutscene.onComplete = () => {
-        // Open CV in new tab
-        window.open('models/Piseth_Tyvirakpoung_CV.pdf', '_blank');
-
         // Show Ending Menu
         document.getElementById('ending-menu').style.display = 'flex';
+
+        // Attempt to open CV automatically (might be blocked on mobile, but fallback is the button)
+        try {
+            window.open('models/Piseth_Tyvirakpoung_CV.pdf', '_blank');
+        } catch (e) {
+            console.warn("Auto-opening PDF blocked or failed:", e);
+        }
     };
 
     cutscene.start(endingDialogue);
@@ -509,6 +563,10 @@ document.getElementById('roam-button').addEventListener('click', (e) => {
 
 document.getElementById('ending-home-button').addEventListener('click', () => {
     location.reload();
+});
+
+document.getElementById('view-cv-button').addEventListener('click', () => {
+    window.open('models/Piseth_Tyvirakpoung_CV.pdf', '_blank');
 });
 
 // Check if hint should be shown

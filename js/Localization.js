@@ -18,7 +18,8 @@ const LANG = {
             enterName: "名前を入力してください。",
             hint: "クリックまたはEnterキーで続行...",
             characterName: "パン",
-            pressE: "Eキーを押して拾う"
+            pressE: "Eキーを押して拾う",
+            viewCV: "履歴書(CV)を表示"
         },
         documentNames: {
             intro: "自己紹介",
@@ -65,7 +66,7 @@ const LANG = {
                 "暇な時には、自分のゲームやウェブサイトを作っています。楽しいからです。"
             ],
             docHobbies: [
-                "私の趣味は、ゲームやアニメを見ることとサッカーです。",
+                "私の趣味は、ゲームやアニメを見ることでとサッカーです。",
                 "好きなアニメは『ブルーロック』と『ブラッククローバー』です。面白いと思います。",
                 "スポーツではサッカーが一番好きです！観戦もプレイも好きで、サッカーゲームもよくやります。",
                 "他にも、日本の文化と景色に興味があります。とても美しいと思います！"
@@ -88,8 +89,8 @@ const LANG = {
         ui: {
             title: "Welcome!",
             intro1: "This is Pan's Portfolio. Use WASD to move and mouse to look around. Press SPACE to jump and E to pick up documents.",
-            intro2: "In this game, there are 5 documents. Please collect them all. Each document contains specific information. Once collected, you can finish the game.",
-            intro3: "Enjoy and nice to meet you!",
+            intro2: "In this game, there are 5 documents. Please collect them all. Each document contains information about me. Once collected, you can finish the game and I will print a CV for you.",
+            intro3: "I hope you enjoy my little world and nice to meet you!",
             startButton: "Start",
             instructions: "<strong>Controls:</strong><br>WASD - Move<br>Mouse - Look<br>SPACE - Jump<br>E - Pick up Document",
             documentsCollected: "Documents Collected",
@@ -102,7 +103,8 @@ const LANG = {
             enterName: "Please enter your name.",
             hint: "Click or Press Enter to continue...",
             characterName: "Pan",
-            pressE: "Press E to pick up"
+            pressE: "Press E to pick up",
+            viewCV: "View CV"
         },
         documentNames: {
             intro: "Introduction",
@@ -230,6 +232,9 @@ function updateUIText() {
 
     const endHomeBtn = document.getElementById('ending-home-button');
     if (endHomeBtn) endHomeBtn.textContent = t.endingHomeButton;
+
+    const viewCVBtn = document.getElementById('view-cv-button');
+    if (viewCVBtn) viewCVBtn.textContent = t.viewCV;
 
     // Input
     const inputHint = document.querySelector('#cutscene-input-container p');
