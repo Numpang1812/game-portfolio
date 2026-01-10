@@ -9,12 +9,10 @@ class Terrain {
         this.heightData = [];
         this.trees = []; // Store tree positions and radii for collision
 
-        // Noise settings
         this.noise = new ImprovedNoise();
     }
 
     generate() {
-        // Create plane geometry
         this.geometry = new THREE.PlaneGeometry(this.width, this.depth, this.segments, this.segments);
         this.geometry.rotateX(-Math.PI / 2);
 
@@ -22,24 +20,17 @@ class Terrain {
         this.heightData = new Float32Array(vertices.length / 3);
         const maxDist = Math.sqrt(Math.pow(this.width / 2, 2) + Math.pow(this.depth / 2, 2));
 
-        // Apply noise to height
         for (let i = 0, j = 0; i < vertices.length; i += 3, j++) {
             const x = vertices[i];
             const z = vertices[i + 2];
 
-            // Base Noise layers
             let y = 0;
             y += this.noise.noise(x * 0.015, 0, z * 0.015) * 25; // Mountains
-            y += this.noise.noise(x * 0.06, 0, z * 0.06) * 8;    // Hills
-            y += this.noise.noise(x * 0.2, 0, z * 0.2) * 2;      // Detail
+            y += this.noise.noise(x * 0.2, 0, z * 0.2) * 2;
 
-            // Island Falloff (Mask)
-            // Calculate distance from center (normalized 0 to 1)
             const dist = Math.sqrt(x * x + z * z);
-            const normalizedDist = dist / (this.width / 2); // 0 at center, 1 at edge
+            const normalizedDist = dist / (this.width / 2);
 
-            // smoothstep-like falloff
-            // We want 1.0 at center, fading effectively to 0.0 around 0.8 distance
             let mask = 1.0 - Math.pow(normalizedDist, 2.5);
             if (mask < 0) mask = 0;
 
@@ -56,7 +47,6 @@ class Terrain {
 
         this.geometry.computeVertexNormals();
 
-        // Vertex colors
         const count = this.geometry.attributes.position.count;
         this.geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(count * 3), 3));
 
@@ -136,7 +126,6 @@ class Terrain {
         const brown = new THREE.MeshStandardMaterial({ color: 0x3d2b1f });
 
         if (type === 0) {
-            // Pine
             const leaves = new THREE.Mesh(new THREE.ConeGeometry(1, 4, 8), darkGreen);
             leaves.position.y = 2.5;
             leaves.castShadow = true;
@@ -149,7 +138,6 @@ class Terrain {
             tree.add(leaves);
 
         } else if (type === 1) {
-            // Oak
             const leaves = new THREE.Mesh(
                 new THREE.IcosahedronGeometry(1.5, 0),
                 new THREE.MeshStandardMaterial({ color: 0x228b22, flatShading: true })
@@ -169,7 +157,6 @@ class Terrain {
             collisionRadius = 0.7;
 
         } else {
-            // Bush
             const leaves = new THREE.Mesh(
                 new THREE.DodecahedronGeometry(1, 0),
                 new THREE.MeshStandardMaterial({ color: 0x32cd32, flatShading: true })

@@ -13,11 +13,11 @@ let moveRight = false;
 let canJump = false;
 let documents = [];
 let collectedCount = 0;
-const gravity = 0.005;
-let velocity = new THREE.Vector3();
-let terrain;
-let cutscene;
-let selectedCharacter = "knight";
+const gravity = 0.005; // Gravity constant
+let velocity = new THREE.Vector3(); // Player velocity
+let terrain; // Terrain object
+let cutscene; // Cutscene object
+let selectedCharacter = "knight"; // Selected character
 let touchControls; // Mobile controls
 let backgroundMusic; // Background audio
 let menuMusic; // Menu-only audio
@@ -27,7 +27,7 @@ const clouds = []; // Array to store cloud meshes
 // Document Colors and Keys
 const documentTypes = [
     { key: "intro", color: 0x3498db },
-    { key: "objective", color: 0xffa500 }, 
+    { key: "objective", color: 0xffa500 },
     { key: "skills", color: 0xe74c3c },
     { key: "experience", color: 0x9b59b6 },
     { key: "hobbies", color: 0xf1c40f }
@@ -78,22 +78,11 @@ if (entryScreen) {
     document.addEventListener('keydown', handleEntry);
 }
 
-// Character Selection Logic
-document.querySelectorAll('.char-option').forEach(option => {
-    option.addEventListener('click', () => {
-        document.querySelectorAll('.char-option').forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedCharacter = option.getAttribute('data-char');
-    });
-});
 
 // Start game when button is clicked
 document.getElementById('start-button').addEventListener('click', function () {
     let playerName = "Traveler"; // Default temporary name
     document.getElementById('start-screen').style.display = 'none';
-
-    // Stop menu music is moved to cutscene.onComplete
-    // Initialize and play background music is moved to cutscene.onComplete
 
     // Update character image for cutscene
     const charImg = document.getElementById('character-image');
@@ -171,7 +160,7 @@ document.addEventListener('keyup', onKeyUp);
 function init() {
     // ✅ CREATE SCENE
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Sky blue
+    scene.background = new THREE.Color(0x87CEEB);
     scene.fog = new THREE.Fog(0x87CEEB, 20, 200);
 
     // ✅ CREATE CAMERA
@@ -181,7 +170,7 @@ function init() {
         0.1,
         1000
     );
-    camera.rotation.order = 'YXZ'; // Essential for FPS look
+    camera.rotation.order = 'YXZ';
     camera.position.set(0, 10, 0); // Start higher up
 
     // ✅ CREATE RENDERER
@@ -195,7 +184,6 @@ function init() {
     controls = new THREE.PointerLockControls(camera, document.body);
     scene.add(controls.getObject());
 
-    // 🔒 Lock pointer when game starts (after user clicks)
     document.addEventListener('click', function () {
         // Don't lock if clicking on pause menu buttons or during other UI interactions
         if (document.getElementById('pause-menu').style.display === 'flex') return;
@@ -217,9 +205,8 @@ function init() {
         document.getElementById('pause-menu').style.display = 'flex';
     });
 
-    // Pause Menu Buttons
     document.getElementById('resume-button').addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent document click handler (which tries to lock) from firing
+        e.stopPropagation();
         document.getElementById('pause-menu').style.display = 'none';
         // Only lock if NOT in cutscene
         const isCutsceneActive = document.getElementById('cutscene-overlay').style.display !== 'none';
@@ -324,11 +311,9 @@ function createClouds() {
     }
 }
 
-// Create document objects
 function createDocuments() {
-    // Determine random positions on land
-    const range = 170;// Increased range for better scattering
-    const minDistance = 10; // Minimum distance between documents
+    const range = 170;
+    const minDistance = 10;
     const placedPositions = [];
     let created = 0;
 
@@ -414,13 +399,8 @@ function checkDocumentCollection() {
 
             collectedDocuments.push(docName);
 
-            // Update UI
             document.getElementById('document-count').textContent = collectedCount;
-            updateCollectedDocumentsList(); // This needs update to pull localized names if we store keys? 
-            // Better to store keys in collectedDocuments and localize on render.
-            // But for now let's just push the localized name or better: push the KEY.
-
-            // Correction: let's push the KEY to collectedDocuments so we can re-render in correct lang
+            updateCollectedDocumentsList();
             collectedDocuments[collectedDocuments.length - 1] = docNameKey;
             updateCollectedDocumentsList();
 
@@ -428,9 +408,7 @@ function checkDocumentCollection() {
             window.isSystemUnlock = true;
             try {
                 controls.unlock();
-            } catch (e) {
-                // Ignore unlocking error on mobile
-            }
+            } catch (e) { }
 
             // Pull dialogue from Localization
             // We need to map key to dialogue properties
@@ -473,7 +451,7 @@ function updateCollectedDocumentsList() {
     const container = document.getElementById('collected-docs');
     container.innerHTML = '';
 
-    collectedDocuments.forEach(docKey => { // collectedDocuments now stores KEYS
+    collectedDocuments.forEach(docKey => {
         const docName = LANG[currentLanguage].documentNames[docKey] || docKey;
         const docElement = document.createElement('div');
         docElement.textContent = `✓ ${docName}`;
@@ -481,35 +459,7 @@ function updateCollectedDocumentsList() {
     });
 }
 
-// Show collection message
-function showCollectionMessage(docName) {
-    const message = document.createElement('div');
-    message.style.position = 'absolute';
-    message.style.top = '50%';
-    message.style.left = '50%';
-    message.style.transform = 'translate(-50%, -50%)';
-    message.style.color = 'white';
-    message.style.fontSize = '24px';
-    message.style.fontWeight = 'bold';
-    message.style.textShadow = '0 0 10px black';
-    message.style.zIndex = '150';
-    message.style.background = 'rgba(0, 100, 0, 0.7)';
-    message.style.padding = '10px 20px';
-    message.style.borderRadius = '10px';
-    message.textContent = `Collected: ${docName}`;
-    document.body.appendChild(message);
 
-    // Fade out and remove
-    setTimeout(() => {
-        message.style.transition = 'opacity 1s';
-        message.style.opacity = '0';
-        setTimeout(() => {
-            document.body.removeChild(message);
-        }, 1000);
-    }, 1500);
-}
-
-// Show win message
 // Trigger Ending Sequence
 function triggerEndingSequence() {
     // Unlock pointer for cutscene
@@ -582,7 +532,7 @@ function animate() {
 
     const isLocked = controls.isLocked;
     const isTouch = touchControls && touchControls.isActive();
-    const isGameActive = isLocked || isTouch || (touchControls && touchControls.joystickActive); // Allow joystick even if not effectively looking
+    const isGameActive = isLocked || isTouch || (touchControls && touchControls.joystickActive);
 
     // Let's check if start screen is hidden
     const isStarted = document.getElementById('start-screen').style.display === 'none';
@@ -630,10 +580,8 @@ function animate() {
         // Check new position
         const newPos = controls.getObject().position;
         const newHeight = terrain.getHeightAt(newPos.x, newPos.z);
-        const waterBuffer = -1.5; // Stop before touching water (water is at -2)
+        const waterBuffer = -1.5;
 
-        // 1. Water Border Check (Invisible Wall)
-        // Only block if it's "Sea" (far from center). 
         // Rivers/Lakes closer to center (dist < 120) are safe to enter.
         const distFromCenter = Math.sqrt(newPos.x * newPos.x + newPos.z * newPos.z);
 
@@ -648,7 +596,6 @@ function animate() {
             newPos.z = oldZ;
         }
 
-        // Apply Vertical Movement
         newPos.y += velocity.y;
 
         // Terrain collision (Ground)
@@ -665,7 +612,6 @@ function animate() {
         updatePickupHint();
     }
 
-    // Animate documents (spin)
     documents.forEach(doc => {
         if (doc.visible) {
             doc.rotation.y += 0.01;

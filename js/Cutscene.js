@@ -5,7 +5,7 @@ class Cutscene {
         this.playerName = ""; // Will be set later
         this.overlay = document.getElementById('cutscene-overlay');
         this.dialogueBox = document.getElementById('dialogue-box');
-        this.characterContainer = document.getElementById('character-container'); // Add reference
+        this.characterContainer = document.getElementById('character-container');
         this.dialogueText = document.getElementById('dialogue-text');
         this.nameTag = document.getElementById('character-name');
 
@@ -129,7 +129,7 @@ class Cutscene {
         if (index >= this.activeDialogues.length) {
             if (this.needNameInput) {
                 this.showNameInput();
-                this.needNameInput = false; // Prevent loop, although we switch activeDialogues in submitName
+                this.needNameInput = false;
                 return;
             }
             this.end();
@@ -153,7 +153,6 @@ class Cutscene {
                 setTimeout(typeLoop, this.typeSpeed);
             } else {
                 this.isTyping = false;
-                // Auto-advance after 5 seconds
                 this.autoAdvanceTimer = setTimeout(() => this.advance(), 15000);
             }
         };
@@ -171,7 +170,6 @@ class Cutscene {
             this.isTyping = false;
             if (this.activeDialogues) {
                 this.dialogueText.textContent = this.activeDialogues[this.currentIndex];
-                // Even if instant, we should set the auto-timer for the next advance
                 this.autoAdvanceTimer = setTimeout(() => this.advance(), 15000);
             }
         } else {
@@ -189,6 +187,6 @@ class Cutscene {
         this.overlay.style.opacity = '0';
         setTimeout(() => {
             this.overlay.style.display = 'none';
-        }, 1000); // Fade out duration
+        }, 1000);
     }
 }

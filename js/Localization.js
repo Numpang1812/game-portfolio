@@ -80,9 +80,6 @@ const LANG = {
             ]
         },
         misc: {
-            collected: "収集済み: ",
-            winMessage: "ミッションコンプリート！<br>すべての書類を集めました！",
-            playAgain: "もう一度プレイ"
         }
     },
     en: {
@@ -163,9 +160,6 @@ const LANG = {
             ]
         },
         misc: {
-            collected: "Collected: ",
-            winMessage: "MISSION COMPLETE!<br>All documents collected!",
-            playAgain: "Play Again"
         }
     }
 };
