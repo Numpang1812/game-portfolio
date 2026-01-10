@@ -18,120 +18,88 @@ Because this project uses only client-side technologies (HTML, CSS, JavaScript) 
 
 This project is built using vanilla web technologies and the Three.js library for 3D rendering.
 
-*   **HTML5**: Provides the structure of the page (UI overlays, canvas container).
-*   **CSS3**: Handles styling for the user interface (menus, hints, dialogs), animations (flicker, breathe), and responsive design for mobile devices.
-*   **JavaScript (ES6+)**: Handles all game logic, 3D rendering, and interactivity.
-*   **Three.js (r132)**: A powerful 3D library used for:
-    *   Rendering the 3D scene (WebGL).
-    *   Handling the camera and lighting.
-    *   Loading 3D geometries (Box, Cylinder, Plane).
-    *   Managing materials and shadows.
-*   **PointerLockControls**: A Three.js add-on that allows the mouse to control the camera view (FPS style) on desktop.
-*   **ImprovedNoise.js**: A Perlin noise algorithm used to procedurally generate the terrain heightmap.
+*   **HTML5**: Structure and UI overlays.
+*   **CSS3**: UI Styling, responsive layout, and animations (pulsing entry text, breathing character portraits).
+*   **JavaScript (ES6+)**: Core engine, state management, and asset handling.
+*   **Three.js (r132)**: WebGL 3D rendering, camera/lighting management, and physics math.
+*   **Web Audio API**: Specialized management of menu and background tracks.
+*   **PointerLockControls**: FPS-style mouse interaction for desktop.
+*   **ImprovedNoise.js**: Procedural generation for the 300x300 terrain heightmap.
 
 ---
 
 ## File Overview
 
 ### 1. `index.html`
-The entry point of the application.
-*   **Head**: Loads stylesheets, fonts (Zen Old Mincho), and Three.js libraries (CDN).
-*   **Body**: Contains the UI elements:
-    *   `#start-screen`: The initial welcome screen with language toggle and "Start" button.
-    *   `#ui-container`: Displays collection count and list.
-    *   `#mobile-ui`: The virtual joystick and buttons (visible only on mobile).
-    *   `#cutscene-overlay`: The container for dialogue sequences and character portraits.
-    *   `#pickup-hint`: The "Press E" prompt.
-*   **Scripts**: Loads all game scripts in order (`Localization.js`, `TouchControls.js`, `ImprovedNoise.js`, `Terrain.js`, `Cutscene.js`, `main.js`).
+The main entry point. Orchestrates the loading of several UI layers:
+*   **`#entry-screen`**: Initial "Click to Enter" splash screen to safely trigger audio.
+*   **`#start-screen`**: Level selection, character choosing, and language toggles.
+*   **`#ui-container`**: Live-updated collection HUD.
+*   **`#mobile-ui`**: Virtual joystick and touch buttons for mobile users.
+*   **`#cutscene-overlay`**: RPG-style dialogue system with names and interactive input.
 
-### 2. `css/styles.css`
-Contains all visual styling.
-*   **Typography**: Sets fonts and text shadows.
-*   **UI Layout**: Positions the start screen, pause menu, and ending menu.
-*   **Animations**: Defines `@keyframes` for the pickup hint flicker and character "breathing" effect.
-*   **Responsive Design**: Contains a `@media` query to show `#mobile-ui` and adjust sizes on screens smaller than 1366px or with coarse pointers.
+### 2. `css/`
+*   **`styles.css`**: Base visual design, premium typography (Zen Old Mincho), and core animations.
+*   **`mobile_responsive.css`**: Dedicated overrides for screens < 768px or tablets up to 1366px. Handles container scaling, smaller font sizes, and UI positioning.
 
 ### 3. `js/main.js`
-The core game engine.
-*   **`init()`**: Sets up the Three.js scene (Camera, Renderer, Lights, Fog). Initializes the Terrain, Controls, and Documents.
-*   **`animate()`**: The main game loop running 60 times per second. Handles:
-    *   Physics (Gravity, Velocity).
-    *   Movement (Keyboard + Touch integration).
-    *   Collisions (Terrain, Trees, Water borders).
-    *   Document spinning animation.
-    *   Rendering the scene.
-*   **`createDocuments()`**: Scatters 5 collectible documents randomly across the terrain.
-*   **`checkDocumentCollection()`**: Detects proximity to documents, handles collection, triggering cutscenes, and unlocking controls (with mobile safety checks).
-*   **`triggerEndingSequence()`**: Handles the win state, opens the CV pdf, and shows the final menu.
-*   **`updatePickupHint()`**: Checks logic to show/hide the "Press E" hint.
+The central brain of the game.
+*   **Audio Logic**: Manages the transition from `menuMusic` (Kousui) to the atmospheric `backgroundMusic` exactly when roaming begins.
+*   **Spawning**: Scatters 5 documents across a wide range with a minimum distance check to ensure even distribution.
+*   **Cloud System**: Manages 30 voxel-style cloud clusters with randomized sizes and drifting behavior.
+*   **Physics & Animation**: Handles player gravity, collision detection (terrain, trees, sea borders), and the main 60fps render loop.
+*   **Interaction Flow**: Removed intrusive "Click to Resume" blockers for a more seamless gameplay flow.
 
 ### 4. `js/Terrain.js`
-Procedurally generates the island world.
-*   **`generate()`**: Creates a 300x300 plane.
-*   **Heightmap Logic**: Uses `ImprovedNoise` to modify vertex heights, creating mountains, hills, and flattening the edges into the sea.
-*   **Vertex Coloring**: Colors the terrain based on height (Deep Ocean -> Sand -> Forest -> Stone -> Snow).
-*   **`addVegetation()`**: Randomly places trees (Pine, Oak, Bush) on land areas.
-*   **`getHeightAt(x, z)`**: Utility to find the ground height at any coordinate (used for player gravity).
-*   **`checkTreeCollision()`**: Prevents the player from walking through trees.
+Generates the procedural island.
+*   Places 500+ trees (Pine, Oak, Bush) based on terrain height.
+*   Provides height-checking and collision logic for all other entities.
+*   Includes a vast, transparent water plane for the surrounding ocean.
 
 ### 5. `js/Cutscene.js`
-Manages the dialogue sequences.
-*   **`start(dialogue)`**: Begins a cutscene, showing the overlay and the first line of text.
-*   **`advance()`**: Moves to the next line. Handles special cases like `{PLAYER_NAME}` replacement.
-*   **Name Input**: Handles the initial flow where the player types their name.
+The story engine.
+*   Handles typewriter text effects and auto-advancing dialogues.
+*   Integrates the player-defined name into the story.
+*   Synchronous completion callbacks to allow seamless PointerLock re-acquisition.
 
 ### 6. `js/TouchControls.js`
-Provides mobile input support.
-*   **Joystick**: Tracks touch movement on the left screen to act as WASD input.
-*   **Look**: Tracks touch drag on the right screen to rotate the camera (Yaw/Pitch) using correct `YXZ` order for FPS feel.
-*   **Buttons**: Handles "Jump" and "Pick" touch events.
+Enables premium mobile play.
+*   **Virtual Joystick**: Smooth movement translation.
+*   **Touch Look**: Rotational camera control specifically tuned for touch inertia.
+*   **Action Buttons**: Large, accessible targets for Jumping and Interaction.
 
 ### 7. `js/Localization.js`
-Stores all text content strings.
-*   **`LANG` Object**: Contains `en` (English) and `jp` (Japanese) versions of:
-    *   UI text (Start, Resume, Collected).
-    *   Document names (Intro, Skills, etc.).
-    *   Dialogues (Intro conversation, Document reactions, Ending).
-
-### 8. `js/ImprovedNoise.js`
-A mathematical utility class.
-*   Implements Ken Perlin's Improved Noise algorithm to creating smooth, natural-looking random values for terrain generation.
+Multi-language support for:
+*   UI elements and instruction labels.
+*   Document category names (Intro, Skills, Objective, Experience, Hobbies).
+*   Full character dialogue scripts.
 
 ---
 
 ## Key Game Elements
 
-### The Player
-*   Represented by a camera at eye level (`y + 1.6`).
-*   Uses a `velocity` vector for jumping and gravity.
-*   Controls are locked to the center (PointerLock) on PC, and use a Virtual Joystick on mobile.
+### Audio Experience
+*   **Entry Splash**: Required by browser autoplay policies; captures initial gesture to start music.
+*   **Music Transition**: `menuMusic` persists through name input/intro dialogue for a cinematic feel, switching to medieval acoustic vibes only when the player takes control.
 
-### The Terrain
-*   Generated on the fly, so it's slightly different (or same seed if noise is fixed) every time.
-*   Includes "invisible walls" logic to prevent walking into deep water.
+### Exploration & Objective
+*   **Document Colors**: Purposefully colored for visibility (e.g., Orange for "Objective" to contrast with green forest).
+*   **Point Lights & Markers**: Each document has a vertical pulsing "arrow" marker and a colored glow to assist discovery.
+*   **Winning**: Collecting all 5 documents triggers a final sequence that offers a direct button to **"View CV"** (designed specifically to bypass mobile popup blockers).
 
-### Documents
-*   The main objective. There are 5 documents colored by category.
-*   Collecting one pauses the game and plays a cutscene explaining the portfolio section (e.g., "This is my skills document").
-*   Collecting all 5 triggers the ending.
-
-### Lighting
-*   **AmbientLight**: General softness.
-*   **DirectionalLight**: The "Sun", casting shadows.
-*   **PointLights**: Attached to documents to make them glow and easier to find.
+### Environmental Detail
+*   **Voxel Clouds**: Procedurally grouped blocks at varying altitudes that drift slowly, adding depth to the sky.
+*   **Terrain Biomes**: Color transitions from sandy beaches up to snowy mountain peaks.
 
 ---
 
-## How to Play
+## Controls
 
-*   **PC**:
-    *   **WASD**: Move.
-    *   **Mouse**: Look.
-    *   **Space**: Jump.
-    *   **E**: Pick up document.
-    *   **Esc**: Pause.
-*   **Mobile**:
-    *   **Left Stick**: Move.
-    *   **Right Screen Drag**: Look.
-    *   **Jump Button**: Jump.
-    *   **Pick Button**: Pick up document.
+| Action | PC (Keyboard/Mouse) | Mobile (Touch) |
+| :--- | :--- | :--- |
+| **Move** | WASD | Virtual Joystick (Left) |
+| **Look** | Mouse Move | Drag Right Screen |
+| **Jump** | SPACE | Jump Button |
+| **Interact/Pick** | E | Interaction Button |
+| **View CV** | Automatic/Button | "View CV" Button |
+| **Pause** | ESC | Back/Home Buttons |
