@@ -1,140 +1,165 @@
 /* Mobile Responsive Styles */
 
-@media (max-width: 768px), (pointer: coarse) {
+@media (max-width: 768px),
+(pointer: coarse) {
+
     /* General Font Adjustments */
     #start-screen h1 {
-        font-size: 2.5rem;
+        font-size: 2.3rem;
+        /* Reduced from 2.5rem */
         -webkit-text-stroke: 1px black;
     }
 
     #start-screen p {
-        font-size: 1rem;
-        max-width: 90%;
-        margin-bottom: 25px;
+        font-size: 0.8rem;
+        /* Reduced from 1.0rem */
+        max-width: 85%;
+        margin-bottom: 20px;
+        line-height: 1.4;
     }
 
     #start-button {
-        padding: 12px 30px;
-        font-size: 1.2rem;
+        padding: 10px 25px;
+        font-size: 1.0rem;
+        /* Reduced from 1.2rem */
     }
 
     #lang-toggle {
-        font-size: 1rem !important;
-        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+        /* Reduced from 1.0rem */
+        padding: 6px 10px !important;
         top: 10px !important;
         right: 20px !important;
     }
 
     /* Input and Character Selection */
     #player-name-input {
-        width: 200px;
-        font-size: 1rem;
+        width: 180px;
+        font-size: 0.8rem;
+        /* Reduced from 1.0rem */
     }
 
     .character-selection {
-        gap: 15px;
-        margin-bottom: 20px;
+        gap: 10px;
+        margin-bottom: 15px;
     }
 
     .char-option {
-        width: 100px;
-        padding: 10px;
+        width: 90px;
+        padding: 8px;
     }
 
     .char-option img {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .char-option span {
+        font-size: 0.8rem;
     }
 
     /* Dialogue Box */
     #dialogue-box {
         width: 90%;
-        bottom: 30px;
-        padding: 15px;
+        bottom: 25px;
+        padding: 12px;
     }
 
     #character-name {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
+        /* Reduced from 1.1rem */
     }
 
     #dialogue-text {
-        font-size: 0.95rem;
-        min-height: 50px;
+        font-size: 0.75rem;
+        /* Reduced from 0.95rem */
+        min-height: 40px;
     }
 
     /* Cutscene Name Input */
     #cutscene-input-container {
         width: 90%;
-        height: 40%;
-        font-size: 1.5rem;
+        height: 45%;
+        font-size: 1.3rem;
+        /* Reduced from 1.5rem */
     }
 
     #cutscene-name-input {
-        width: 80%;
-        font-size: 1.2rem;
-        padding: 10px;
+        width: 70%;
+        font-size: 1.0rem;
+        /* Reduced from 1.2rem */
+        padding: 8px;
     }
 
     /* Pause and Ending Menus */
-    #pause-container, #ending-container {
+    #pause-container,
+    #ending-container {
         width: 90%;
         height: 60%;
     }
 
-    #pause-menu h1, #ending-menu h1 {
-        font-size: 2.5rem;
-        margin-bottom: 20px;
+    #pause-menu h1,
+    #ending-menu h1 {
+        font-size: 2.3rem;
+        /* Reduced from 2.5rem */
+        margin-bottom: 15px;
     }
 
     .pause-buttons button {
-        padding: 12px 40px;
-        font-size: 1.2rem;
+        padding: 10px 30px;
+        font-size: 1.0rem;
+        /* Reduced from 1.2rem */
     }
 
     /* Mobile UI elements (Joystick / Buttons) */
     #joystick-zone {
-        bottom: 30px;
-        left: 30px;
-        width: 120px;
-        height: 120px;
+        bottom: 20px;
+        left: 20px;
+        width: 100px;
+        height: 100px;
     }
 
     #joystick-knob {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
     }
 
     #btn-container {
-        bottom: 30px;
-        right: 30px;
-        gap: 15px;
+        bottom: 20px;
+        right: 20px;
+        gap: 12px;
     }
 
     #btn-container button {
-        width: 70px;
-        height: 70px;
-        font-size: 0.9rem;
+        width: 65px;
+        height: 65px;
+        font-size: 0.7rem;
+        /* Reduced from 0.9rem */
     }
 
     /* UI Overlay */
     #ui-container {
         top: 10px;
         left: 10px;
-        font-size: 14px;
-        padding: 8px 12px;
+        font-size: 12px;
+        /* Reduced from 14px */
+        padding: 6px 10px;
     }
 
     #collected-docs {
-        font-size: 1rem;
+        font-size: 0.8rem;
+        /* Reduced from 1.0rem */
     }
 
     #pickup-hint {
         top: 75%;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
+        /* Reduced from 1.1rem */
     }
 
     .instructions {
-        display: none; /* Hide keyboard instructions on mobile */
+        display: none;
+        /* Hide keyboard instructions on mobile */
     }
 }
 
@@ -145,21 +170,30 @@
     }
 
     #dialogue-box {
-        bottom: 20px;
-        padding: 10px 15px;
+        bottom: 15px;
+        padding: 8px 12px;
     }
 
-    #cutscene-input-container, #pause-container, #ending-container {
-        height: 80%;
-        width: 70%;
+    #cutscene-input-container,
+    #pause-container,
+    #ending-container {
+        height: 85%;
+        width: 65%;
     }
 
-    #pause-menu h1, #ending-menu h1 {
-        font-size: 2rem;
-        margin-bottom: 15px;
+    #pause-menu h1,
+    #ending-menu h1 {
+        font-size: 1.8rem;
+        /* Reduced from 2.0rem */
+        margin-bottom: 10px;
     }
 
     .pause-buttons {
         flex-direction: row;
+        gap: 15px;
+    }
+
+    #start-screen p {
+        margin-bottom: 15px;
     }
 }
