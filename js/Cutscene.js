@@ -24,6 +24,7 @@ class Cutscene {
         this.typeSpeed = 30;
         this.activeDialogues = [];
         this.autoAdvanceTimer = null;
+        this.hideTimeout = null; // Timer to hide the overlay after fade-out
 
         // Bind click to advance
         this.overlay.addEventListener('click', (e) => {
@@ -60,6 +61,12 @@ class Cutscene {
     }
 
     start(customDialogues = null) {
+        // Clear any pending hide timeout from a previous cutscene
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+            this.hideTimeout = null;
+        }
+
         this.overlay.style.display = 'flex';
         this.overlay.style.opacity = '1';
 
@@ -185,8 +192,9 @@ class Cutscene {
         if (this.onComplete) this.onComplete();
 
         this.overlay.style.opacity = '0';
-        setTimeout(() => {
+        this.hideTimeout = setTimeout(() => {
             this.overlay.style.display = 'none';
+            this.hideTimeout = null;
         }, 1000);
     }
 }

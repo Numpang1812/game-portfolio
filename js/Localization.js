@@ -19,7 +19,13 @@ const LANG = {
             hint: "クリックまたはEnterキーで続行...",
             characterName: "パン",
             pressE: "Eキーを押して拾う",
-            viewCV: "履歴書(CV)を表示"
+            viewCV: "履歴書(CV)を表示",
+            endingTitleDirect: "プレイしていただき、ありがとうございます！",
+            endingP1: "この小さな世界を楽しかったなら、良かったです！",
+            endingP2: "CVを表示したいなら、表示ボタンを押してください。",
+            endingP3: "これからもよろしくお願いいたします！",
+            roamButtonDirect: "探索する",
+            directCVButton: "履歴書(CV)を表示"
         },
         documentNames: {
             intro: "自己紹介",
@@ -101,7 +107,13 @@ const LANG = {
             hint: "Click or Press Enter to continue...",
             characterName: "Pan",
             pressE: "Press E to pick up",
-            viewCV: "View CV"
+            viewCV: "View CV",
+            endingTitleDirect: "Thank you for playing my game!",
+            endingP1: "I hope you enjoyed exploring this small world.",
+            endingP2: "You can view my CV by clicking the button below.",
+            endingP3: "Looking forward to hearing from you!",
+            roamButtonDirect: "Roam Around",
+            directCVButton: "View CV"
         },
         documentNames: {
             intro: "Introduction",
@@ -165,6 +177,7 @@ const LANG = {
 };
 
 let currentLanguage = 'jp';
+const isEndingPage = window.location.href.toLowerCase().includes('ending_index');
 
 function setLanguage(lang) {
     if (LANG[lang]) {
@@ -177,18 +190,46 @@ function updateUIText() {
     const t = LANG[currentLanguage].ui;
 
     // Start Screen
-    const startTitle = document.querySelector('#start-screen h1');
-    if (startTitle) startTitle.textContent = t.title;
-
-    const startP = document.querySelectorAll('#start-screen p');
-    if (startP.length >= 3) {
-        startP[0].textContent = t.intro1;
-        startP[1].textContent = t.intro2;
-        startP[2].textContent = t.intro3;
+    const startBtn = document.getElementById('start-button');
+    if (startBtn) {
+        if (isEndingPage) {
+            startBtn.textContent = t.roamButtonDirect;
+        } else {
+            startBtn.textContent = t.startButton;
+        }
     }
 
-    const startBtn = document.getElementById('start-button');
-    if (startBtn) startBtn.textContent = t.startButton;
+    // Direct CV Button (Special for ending_index.html)
+    const directCVBtn = document.getElementById('direct-cv-button');
+    if (directCVBtn) directCVBtn.textContent = t.directCVButton;
+
+    // View CV Button (Dynamic in index.html)
+    const skipToCVBtn = document.getElementById('skip-to-cv-button');
+    if (skipToCVBtn) skipToCVBtn.textContent = t.viewCV;
+
+    // Ending Page Specific Texts
+    if (isEndingPage) {
+        const h1 = document.querySelector('#start-screen h1');
+        if (h1) h1.textContent = t.endingTitleDirect;
+
+        const ps = document.querySelectorAll('#start-screen p');
+        if (ps.length >= 3) {
+            ps[0].textContent = t.endingP1;
+            ps[1].textContent = t.endingP2;
+            ps[2].textContent = t.endingP3;
+        }
+    } else {
+        // Normal Start Screen
+        const startTitle = document.querySelector('#start-screen h1');
+        if (startTitle) startTitle.textContent = t.title;
+
+        const startP = document.querySelectorAll('#start-screen p');
+        if (startP.length >= 3) {
+            startP[0].textContent = t.intro1;
+            startP[1].textContent = t.intro2;
+            startP[2].textContent = t.intro3;
+        }
+    }
 
     // HUD
     const docsLabel = document.getElementById('ui-container');
@@ -243,3 +284,6 @@ function updateUIText() {
         updateCollectedDocumentsList();
     }
 }
+
+// Initialize translation on load
+updateUIText();

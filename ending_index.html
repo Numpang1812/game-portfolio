@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piseth Tyvirakpoung's Portfolio</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/PointerLockControls.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile_responsive.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<div id="entry-screen">
+    <div id="entry-content">
+        <h1 id="entry-text">Click to Enter</h1>
+    </div>
+</div>
+
+<div id="start-screen" style="display: none;">
+    <h1>プレイしていただき、ありがとうございます！</h1>
+    <p>この小さな世界を楽しかったなら、良かったです！</p>
+    <p>CVを表示したいなら、表示ボタンを押してください。</p>
+    <p>これからもよろしくお願いいたします！</p>
+
+    <div class="start-buttons-container">
+        <button id="direct-cv-button" class="premium-button">View CV</button>
+        <button id="start-button" class="premium-button secondary">Roam Around</button>
+    </div>
+    <button id="lang-toggle" style="position: absolute; 
+            top: 20px; 
+            right: 50px; 
+            background: transparent; 
+            border: 2px solid white; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            transition: all 0.3s; 
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 8px;">Language:
+        JP</button>
+</div>
+
+<div id="ui-container">
+    Documents Collected: <span id="document-count">0</span>/5
+    <div id="collected-docs"></div>
+</div>
+<div id="pickup-hint" style="display: none;"></div>
+
+<div id="mobile-ui"> <!-- Hidden by default via CSS, shown via media query -->
+    <div id="joystick-zone">
+        <div id="joystick-knob"></div>
+    </div>
+    <div id="btn-container">
+        <button id="btn-jump">JUMP</button>
+        <button id="btn-pickup">PICK</button>
+    </div>
+</div>
+
+<div id="crosshair"></div>
+
+<div class="instructions">
+    <p><strong>コントロール:</strong><br>
+        WASD - 動く<br>
+        マウス - 見る<br>
+        SPACE - ジャンプ<br>
+        E - 書類を取る</p>
+</div>
+<div id="cutscene-overlay">
+    <div id="character-container">
+        <img id="character-image" src="models/knight.png" alt="Character">
+    </div>
+
+    <!-- Name Input for Cutscene -->
+    <div id="cutscene-input-container" class="name-entry-box" style="display: none;">
+        <p>名前を入力してください。</p>
+        <input type="text" id="cutscene-name-input" placeholder="" maxlength="15">
+    </div>
+
+    <div id="dialogue-box">
+        <div id="character-name"></div>
+        <div id="dialogue-text"></div>
+    </div>
+</div>
+<div id="pause-menu" style="display: none;">
+    <div id="pause-container">
+        <h1>Paused</h1>
+        <div class="pause-buttons">
+            <button id="resume-button">Resume</button>
+            <button id="home-button">Back to Home</button>
+        </div>
+    </div>
+</div>
+<div id="ending-menu" style="display: none;">
+    <div id="ending-container">
+        <h1>Thank You!</h1>
+        <div class="pause-buttons">
+            <button id="view-cv-button">View CV</button>
+            <button id="roam-button">Roam Around</button>
+            <button id="ending-home-button">Main Menu</button>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/Localization.js"></script>
+<script src="js/TouchControls.js"></script>
+<script src="js/ImprovedNoise.js"></script>
+<script src="js/Terrain.js"></script>
+<script src="js/Cutscene.js"></script>
+<script src="js/main.js"></script>
+
+</html>

@@ -5,10 +5,26 @@ let keyMoveForward = false;
 let keyMoveBackward = false;
 let keyMoveLeft = false;
 let keyMoveRight = false;
+let keyJump = false; // Space bar state
 let moveForward = false; // logic var, referencing key or touch
 let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
+let gameCompleted = localStorage.getItem('gameCompleted') === 'true';
+// Robust check for the ending/landing page - renamed to avoid global conflict
+const isLandingPage = window.location.href.toLowerCase().includes('ending_index');
+
+// Automatic Redirection if already completed and on main page
+if (gameCompleted && !isLandingPage) {
+    // Only redirect if on index.html or root
+    const isMainPage = window.location.pathname.endsWith('index.html') ||
+        window.location.pathname.endsWith('/') ||
+        window.location.pathname === "";
+
+    if (isMainPage) {
+        window.location.href = 'ending_index.html';
+    }
+}
 
 let canJump = false;
 let documents = [];
@@ -21,7 +37,10 @@ let selectedCharacter = "knight"; // Selected character
 let touchControls; // Mobile controls
 let backgroundMusic; // Background audio
 let menuMusic; // Menu-only audio
+let walkingAudio; // Walking sound
+let swimmingAudio; // Swimming sound
 const clouds = []; // Array to store cloud meshes
+let endingTriggered = false; // Flag to prevent multiple ending triggers
 
 
 // Document Colors and Keys
@@ -72,10 +91,56 @@ const handleEntry = () => {
     document.removeEventListener('keydown', handleEntry);
 };
 
-// Only add listeners if entry screen is present
 if (entryScreen) {
     document.addEventListener('click', handleEntry);
     document.addEventListener('keydown', handleEntry);
+}
+
+if (isLandingPage) {
+    // Hide standard HUD on the landing page
+    const hud = document.getElementById('ui-container');
+    if (hud) hud.style.display = 'none';
+
+    // Handle 'Roam Around' button
+    const roamBtn = document.getElementById('start-button');
+    if (roamBtn) {
+        // Remove existing listener by cloning
+        const newRoamBtn = roamBtn.cloneNode(true);
+        roamBtn.parentNode.replaceChild(newRoamBtn, roamBtn);
+
+        newRoamBtn.addEventListener('click', () => {
+            document.getElementById('start-screen').style.display = 'none';
+
+            // Stop menu music
+            if (menuMusic) {
+                menuMusic.pause();
+                menuMusic = null;
+            }
+
+            // Initialize background music
+            if (!backgroundMusic) {
+                backgroundMusic = new Audio('models/10 Minutes in a Peaceful Medieval Fantasy Village  4K Ambience  Magical Folk Music.mp3');
+                backgroundMusic.loop = true;
+                backgroundMusic.volume = 0.2;
+                backgroundMusic.play().catch(e => { });
+            }
+
+            document.getElementById('crosshair').style.display = 'block';
+            init();
+            animate();
+
+            try { controls.lock(); } catch (e) { }
+        });
+    }
+
+    // Handle 'View CV' button
+    const directCVBtn = document.getElementById('direct-cv-button');
+    if (directCVBtn) {
+        directCVBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.open('models/Piseth_Tyvirakpoung_CV.pdf', '_blank');
+        };
+    }
 }
 
 
@@ -105,8 +170,20 @@ document.getElementById('start-button').addEventListener('click', function () {
         if (!backgroundMusic) {
             backgroundMusic = new Audio('models/10 Minutes in a Peaceful Medieval Fantasy Village  4K Ambience  Magical Folk Music.mp3');
             backgroundMusic.loop = true;
-            backgroundMusic.volume = 0.5; // Start at 50% volume
+            backgroundMusic.volume = 0.2; // Lowered background music volume
             backgroundMusic.play().catch(e => console.warn("Music playback failed:", e));
+        }
+
+        // Initialize movement sounds
+        if (!walkingAudio) {
+            walkingAudio = new Audio('models/walking-sound.mp3');
+            walkingAudio.loop = true;
+            walkingAudio.volume = 0.8; // Increased walking sound volume
+        }
+        if (!swimmingAudio) {
+            swimmingAudio = new Audio('models/swiming-sound.mp3');
+            swimmingAudio.loop = true;
+            swimmingAudio.volume = 0.8; // Increased swimming sound volume
         }
 
         document.getElementById('crosshair').style.display = 'block';
@@ -133,6 +210,7 @@ const onKeyDown = function (event) {
         case 'KeyS': keyMoveBackward = true; break;
         case 'KeyD': keyMoveRight = true; break;
         case 'Space':
+            keyJump = true;
             if (canJump) {
                 velocity.y += 0.15;
                 canJump = false;
@@ -150,6 +228,7 @@ const onKeyUp = function (event) {
         case 'KeyA': keyMoveLeft = false; break;
         case 'KeyS': keyMoveBackward = false; break;
         case 'KeyD': keyMoveRight = false; break;
+        case 'Space': keyJump = false; break;
     }
 };
 
@@ -171,7 +250,7 @@ function init() {
         1000
     );
     camera.rotation.order = 'YXZ';
-    camera.position.set(0, 10, 0); // Start higher up
+    camera.position.set(0, 50, 0); // Start higher up
 
     // ✅ CREATE RENDERER
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -257,9 +336,11 @@ function init() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+
     // ✅ INIT TOUCH CONTROLS
     touchControls = new TouchControls(controls, () => {
-        // Jump Action
+        // Jump Action - Trigger once for ground, but state can be used for swimming
+        keyJump = true;
         if (canJump === true) {
             velocity.y += 0.15;
             canJump = false;
@@ -382,68 +463,76 @@ function createDocuments() {
 function checkDocumentCollection() {
     const playerPosition = controls.getObject().position;
 
-    documents.forEach((doc, index) => {
-        if (doc.userData.collected) return;
-
+    // Use find to only collect one document at a time
+    const nearbyDoc = documents.find(doc => {
+        if (doc.userData.collected) return false;
         const distance = playerPosition.distanceTo(doc.position);
-
-        if (distance < 3.0) {
-            // Collect the document
-            doc.userData.collected = true;
-            doc.visible = false;
-            collectedCount++;
-
-            const docNameKey = doc.userData.key;
-            // Get localized name
-            const docName = LANG[currentLanguage].documentNames[docNameKey] || docNameKey;
-
-            collectedDocuments.push(docName);
-
-            document.getElementById('document-count').textContent = collectedCount;
-            updateCollectedDocumentsList();
-            collectedDocuments[collectedDocuments.length - 1] = docNameKey;
-            updateCollectedDocumentsList();
-
-            // PAUSE GAME & PLAY CUTSCENE
-            window.isSystemUnlock = true;
-            try {
-                controls.unlock();
-            } catch (e) { }
-
-            // Pull dialogue from Localization
-            // We need to map key to dialogue properties
-            // key: intro -> docIntro
-            let dialogueKey = "";
-            switch (docNameKey) {
-                case "intro": dialogueKey = "docIntro"; break;
-                case "objective": dialogueKey = "docObjective"; break;
-                case "skills": dialogueKey = "docSkills"; break;
-                case "experience": dialogueKey = "docExperience"; break;
-                case "hobbies": dialogueKey = "docHobbies"; break;
-            }
-
-            let dialogue = LANG[currentLanguage].dialogues[dialogueKey];
-
-            // Fallback
-            if (!dialogue) dialogue = ["..."];
-
-            // Define resume callback
-            cutscene.onComplete = () => {
-                try {
-                    controls.lock();
-                } catch (e) {
-                    // Ignore on mobile
-                }
-
-                // Win condition check after resume
-                if (collectedCount === documents.length) {
-                    setTimeout(triggerEndingSequence, 1000);
-                }
-            };
-
-            cutscene.start(dialogue);
-        }
+        return distance < 3.0;
     });
+
+    if (nearbyDoc) {
+        const doc = nearbyDoc;
+        // Collect the document
+        doc.userData.collected = true;
+        doc.visible = false;
+        collectedCount++;
+
+        const docNameKey = doc.userData.key;
+        // Get localized name
+        const docName = LANG[currentLanguage].documentNames[docNameKey] || docNameKey;
+
+        collectedDocuments.push(docNameKey);
+
+        document.getElementById('document-count').textContent = collectedCount;
+        updateCollectedDocumentsList();
+
+        // PAUSE GAME & PLAY CUTSCENE
+        window.isSystemUnlock = true;
+        try {
+            controls.unlock();
+        } catch (e) { }
+
+        // Pull dialogue from Localization
+        let dialogueKey = "";
+        switch (docNameKey) {
+            case "intro": dialogueKey = "docIntro"; break;
+            case "objective": dialogueKey = "docObjective"; break;
+            case "skills": dialogueKey = "docSkills"; break;
+            case "experience": dialogueKey = "docExperience"; break;
+            case "hobbies": dialogueKey = "docHobbies"; break;
+        }
+
+        let dialogue = LANG[currentLanguage].dialogues[dialogueKey];
+
+        // Fallback
+        if (!dialogue) dialogue = ["..."];
+
+        // Define resume callback
+        cutscene.onComplete = () => {
+            handleCutsceneComplete();
+        };
+
+        cutscene.start(dialogue);
+    }
+}
+
+// Centralized handler for cutscene completion
+function handleCutsceneComplete() {
+    // Check if we already triggered ending to avoid re-locking or re-triggering
+    if (endingTriggered) return;
+
+    // Normal resume logic
+    try {
+        controls.lock();
+    } catch (e) {
+        // Ignore on mobile
+    }
+
+    // Win condition check - User requested constant check after each cutscene
+    if (collectedCount >= 5 && !endingTriggered) {
+        // Short delay for smoothness
+        setTimeout(triggerEndingSequence, 800);
+    }
 }
 
 // Update the collected documents list in UI
@@ -460,8 +549,14 @@ function updateCollectedDocumentsList() {
 }
 
 
-// Trigger Ending Sequence
 function triggerEndingSequence() {
+    if (endingTriggered && document.getElementById('ending-menu').style.display === 'flex') return;
+    endingTriggered = true;
+
+    // Save to localStorage
+    localStorage.setItem('gameCompleted', 'true');
+    gameCompleted = true;
+
     // Unlock pointer for cutscene
     window.isSystemUnlock = true;
     try {
@@ -546,6 +641,7 @@ function animate() {
         moveBackward = keyMoveBackward;
         moveLeft = keyMoveLeft;
         moveRight = keyMoveRight;
+        let isJumping = keyJump;
 
         // Override/Merge with Touch Controls if active
         if (touchControls) {
@@ -553,13 +649,45 @@ function animate() {
             moveBackward = moveBackward || touchControls.moveBackward;
             moveLeft = moveLeft || touchControls.moveLeft;
             moveRight = moveRight || touchControls.moveRight;
+            isJumping = isJumping || touchControls.isJumpPressed;
         }
 
-        // Apply gravity
-        velocity.y -= gravity;
+        // Detect swimming state
+        const currentPos = controls.getObject().position;
+        // Character height is ~1.6. Water level is at 0.
+        // We are "swimming" if our feet (position.y - 1.6) are below water or near surface.
+        const isSwimming = currentPos.y < 0.5;
+
+        // Apply gravity and buoyancy
+        if (isSwimming) {
+            const isMoving = moveForward || moveBackward || moveLeft || moveRight;
+
+            if (isJumping) {
+                // Swim up impulse
+                velocity.y += 0.008;
+                // Limit upward swim speed
+                if (velocity.y > 0.08) velocity.y = 0.08;
+            } else if (isMoving) {
+                // Maintain depth/Neutral buoyancy while moving
+                // Small dampening to prevent fast sinking/rising
+                velocity.y *= 0.8;
+                velocity.y -= 0.005; // Force sink 0.005 while moving as requested
+                // Very slight sinking if we are too high (simulating weight)
+                if (currentPos.y > 0.2) velocity.y -= 0.01;
+            } else {
+                // Sink slowly if stationary
+                velocity.y -= gravity * 0.2;
+            }
+
+            // Cap sinking speed
+            if (velocity.y < -0.09) velocity.y = -0.09;
+        } else {
+            // Normal gravity on land/air
+            velocity.y -= gravity;
+        }
 
         // Calculate intended movement direction
-        const delta = 0.2;
+        let delta = isSwimming ? 0.08 : 0.16; // Reduced speed in water
         let dx = 0;
         let dz = 0;
 
@@ -569,7 +697,6 @@ function animate() {
         if (moveRight) dx += delta;
 
         // Store old position
-        const currentPos = controls.getObject().position;
         const oldX = currentPos.x;
         const oldZ = currentPos.z;
 
@@ -610,6 +737,43 @@ function animate() {
 
         // Update Pickup Hint
         updatePickupHint();
+
+        // --- MOVEMENT SOUNDS ---
+        const isMoving = moveForward || moveBackward || moveLeft || moveRight;
+        if (isMoving && walkingAudio && swimmingAudio) {
+            if (isSwimming) {
+                // Play swimming, pause walking
+                if (swimmingAudio.paused) swimmingAudio.play().catch(e => { });
+                if (!walkingAudio.paused) walkingAudio.pause();
+                walkingAudio.currentTime = 0;
+            } else {
+                // Play walking, pause swimming
+                if (walkingAudio.paused) walkingAudio.play().catch(e => { });
+                if (!swimmingAudio.paused) swimmingAudio.pause();
+                swimmingAudio.currentTime = 0;
+            }
+        } else {
+            // Not moving - stop both
+            if (walkingAudio && !walkingAudio.paused) {
+                walkingAudio.pause();
+                walkingAudio.currentTime = 0;
+            }
+            if (swimmingAudio && !swimmingAudio.paused) {
+                swimmingAudio.pause();
+                swimmingAudio.currentTime = 0;
+            }
+        }
+    } else {
+        // Game not active (Pause, Cutscene, Ending, Start screen)
+        // Ensure movement sounds are stopped
+        if (walkingAudio && !walkingAudio.paused) {
+            walkingAudio.pause();
+            walkingAudio.currentTime = 0;
+        }
+        if (swimmingAudio && !swimmingAudio.paused) {
+            swimmingAudio.pause();
+            swimmingAudio.currentTime = 0;
+        }
     }
 
     documents.forEach(doc => {

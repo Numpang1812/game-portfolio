@@ -10,7 +10,7 @@ This project is built using vanilla web technologies and the Three.js library fo
 *   **CSS3**: UI Styling, responsive layout, and animations (pulsing entry text, breathing character portraits).
 *   **JavaScript (ES6+)**: Core engine, state management, and asset handling.
 *   **Three.js (r132)**: WebGL 3D rendering, camera/lighting management, and physics math.
-*   **Web Audio API**: Specialized management of menu and background tracks.
+*   **HTML5 Audio**: Specialized management of menu and background tracks.
 *   **PointerLockControls**: FPS-style mouse interaction for desktop.
 *   **ImprovedNoise.js**: Procedural generation for the 300x300 terrain heightmap.
 
@@ -21,7 +21,7 @@ This project is built using vanilla web technologies and the Three.js library fo
 ### 1. `index.html`
 The main entry point. Orchestrates the loading of several UI layers:
 *   **`#entry-screen`**: Initial "Click to Enter" splash screen to safely trigger audio.
-*   **`#start-screen`**: Level selection, character choosing, and language toggles.
+*   **`#start-screen`**: Game introduction, language toggle, and start button.
 *   **`#ui-container`**: Live-updated collection HUD.
 *   **`#mobile-ui`**: Virtual joystick and touch buttons for mobile users.
 *   **`#cutscene-overlay`**: RPG-style dialogue system with names and interactive input.
@@ -72,7 +72,7 @@ Multi-language support for:
 
 ### Exploration & Objective
 *   **Document Colors**: Purposefully colored for visibility (e.g., Orange for "Objective" to contrast with green forest).
-*   **Point Lights & Markers**: Each document has a vertical pulsing "arrow" marker and a colored glow to assist discovery.
+*   **Point Lights & Markers**: Each document has a vertical arrow marker and a colored glow to assist discovery.
 *   **Winning**: Collecting all 5 documents triggers a final sequence that offers a direct button to **"View CV"** (designed specifically to bypass mobile popup blockers).
 
 ### Environmental Detail

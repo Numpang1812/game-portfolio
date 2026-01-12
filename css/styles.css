@@ -406,8 +406,8 @@ canvas {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 50%;
-    height: 50%;
+    width: 70%;
+    height: 70%;
     background-image: url('../models/border-image.png');
     background-size: 100% 100%;
     background-position: center;
@@ -477,6 +477,45 @@ canvas {
     background: white;
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Premium Buttons for Landing Pages */
+.premium-button {
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    padding: 18px 50px;
+    font-size: 1.4rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    font-family: 'Zen Old Mincho', serif;
+    font-weight: bold;
+    min-width: 220px;
+    margin: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.premium-button.secondary {
+    background: linear-gradient(45deg, #ff8a00, #da1b60);
+}
+
+.premium-button:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+}
+
+.premium-button:active {
+    transform: translateY(2px);
+}
+
+.start-buttons-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 30px;
 }
 
 #btn-container {

@@ -12,6 +12,7 @@ class TouchControls {
 
         this.joystickActive = false;
         this.touchLookActive = false;
+        this.isJumpPressed = false; // Persistent state for swimming
 
         this.joystickOrigin = { x: 0, y: 0 };
         this.joystickPointerId = null;
@@ -46,7 +47,15 @@ class TouchControls {
         this.btnJump.addEventListener('touchstart', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            this.isJumpPressed = true;
             if (this.onJump) this.onJump();
+        });
+
+        this.btnJump.addEventListener('touchend', (e) => {
+            this.isJumpPressed = false;
+        });
+        this.btnJump.addEventListener('touchcancel', (e) => {
+            this.isJumpPressed = false;
         });
 
         this.btnPickup.addEventListener('touchstart', (e) => {
