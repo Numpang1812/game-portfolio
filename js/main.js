@@ -101,38 +101,6 @@ if (isLandingPage) {
     const hud = document.getElementById('ui-container');
     if (hud) hud.style.display = 'none';
 
-    // Handle 'Roam Around' button
-    const roamBtn = document.getElementById('start-button');
-    if (roamBtn) {
-        // Remove existing listener by cloning
-        const newRoamBtn = roamBtn.cloneNode(true);
-        roamBtn.parentNode.replaceChild(newRoamBtn, roamBtn);
-
-        newRoamBtn.addEventListener('click', () => {
-            document.getElementById('start-screen').style.display = 'none';
-
-            // Stop menu music
-            if (menuMusic) {
-                menuMusic.pause();
-                menuMusic = null;
-            }
-
-            // Initialize background music
-            if (!backgroundMusic) {
-                backgroundMusic = new Audio('models/10 Minutes in a Peaceful Medieval Fantasy Village  4K Ambience  Magical Folk Music.mp3');
-                backgroundMusic.loop = true;
-                backgroundMusic.volume = 0.2;
-                backgroundMusic.play().catch(e => { });
-            }
-
-            document.getElementById('crosshair').style.display = 'block';
-            init();
-            animate();
-
-            try { controls.lock(); } catch (e) { }
-        });
-    }
-
     // Handle 'View CV' button
     const directCVBtn = document.getElementById('direct-cv-button');
     if (directCVBtn) {

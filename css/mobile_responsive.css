@@ -147,6 +147,17 @@
         font-size: 0.9rem;
     }
 
+    #premium-button{
+        width: 35%;
+        height: 35%;
+
+    }
+
+    #premium-button-secondary{
+        width: 35%;
+        height: 35%;
+    }
+
     .instructions {
         display: none;
         /* Hide keyboard instructions on mobile */
@@ -155,6 +166,17 @@
 
 /* Landscape orientation adjustments for mobile */
 @media (max-width: 932px) and (orientation: landscape) {
+    #premium-button{
+        width: 30%;
+        height: 30%;
+
+    }
+
+    #premium-button-secondary{
+        width: 30%;
+        height: 30%;
+    }
+
     #character-container {
         height: 70vh;
     }

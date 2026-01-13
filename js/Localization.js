@@ -24,7 +24,7 @@ const LANG = {
             endingP1: "この小さな世界を楽しかったなら、良かったです！",
             endingP2: "CVを表示したいなら、表示ボタンを押してください。",
             endingP3: "これからもよろしくお願いいたします！",
-            roamButtonDirect: "探索する",
+            roamButtonDirect: "もう一度探索する",
             directCVButton: "履歴書(CV)を表示"
         },
         documentNames: {
